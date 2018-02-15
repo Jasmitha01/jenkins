@@ -1,0 +1,119 @@
+kind: "Template"
+apiVersion: "v1"
+metadata:
+  name: my-template
+objects:
+  - kind: ImageStream
+    apiVersion: v1
+    metadata:
+      name: ${APPLICATION_NAME}
+      generation: 1
+      labels:
+        app: ${APPLICATION_NAME}
+    spec:
+      tags:
+      - name: latest
+        from:
+          kind: ImageStreamTag
+          name: ${APPLICATION_NAME}:latest
+  - kind: DeploymentConfig
+    apiVersion: v1
+    metadata:
+      name: ${APPLICATION_NAME}
+      labels:
+        app: ${APPLICATION_NAME}
+    spec:
+      strategy:
+        type: ${DEPLOYMENT_STRATEGY}
+        rollingParams:
+          updatePeriodSeconds: 1
+          intervalSeconds: 1
+          timeoutSeconds: 600
+          maxUnavailable: 25%
+          maxSurge: 25%
+        resources: {}
+      triggers:
+      - type: ConfigChange
+      - type: ImageChange
+        imageChangeParams:
+          automatic: true
+          containerNames:
+          - ${APPLICATION_NAME}
+          from:
+            kind: ImageStreamTag
+            name: ${APPLICATION_NAME}:latest
+      replicas: ${REPLICA_SET}
+      test: false
+      selector:
+        app: ${APPLICATION_NAME}
+        deploymentconfig: ${APPLICATION_NAME}
+      template:
+        metadata:
+          labels:
+            app: ${APPLICATION_NAME}
+            deploymentconfig: ${APPLICATION_NAME}
+        spec:
+          containers:
+          - name: ${APPLICATION_NAME}
+            image: ${APPLICATION_NAME}
+            ports:
+            - containerPort: ${POD_PORT}
+              protocol: TCP
+            env:
+            - name: OPENSHIFT_NODEJS_PORT
+              value: '${POD_PORT}'
+            - name: BACKGROUND_MSG
+              valueFrom:
+                configMapKeyRef:
+                  name: config
+                  key: message
+            resources: {}
+            terminationMessagePath: "/dev/termination-log"
+            imagePullPolicy: Always
+          restartPolicy: Always
+          terminationGracePeriodSeconds: 30
+          dnsPolicy: ClusterFirst
+          securityContext: {}
+  - kind: Service
+    apiVersion: v1
+    metadata:
+      name: ${APPLICATION_NAME}
+      labels:
+        app: ${APPLICATION_NAME}
+    spec:
+      ports:
+      - name: ${POD_PORT}-tcp
+        protocol: TCP
+        port: ${POD_PORT}
+        targetPort: ${POD_PORT}
+      selector:
+        app: ${APPLICATION_NAME}
+        deploymentconfig: ${APPLICATION_NAME}
+      type: ClusterIP
+      sessionAffinity: None
+  - kind: Route
+    apiVersion: v1
+    metadata:
+      name: ${APPLICATION_NAME}
+      labels:
+        app: ${APPLICATION_NAME}
+    spec:
+      host: ''
+      to:
+        kind: Service
+        name: ${APPLICATION_NAME}
+      port:
+        targetPort: ${POD_PORT}-tcp
+parameters:
+  - displayName: Application Name
+    required: true
+    name: APPLICATION_NAME
+  - displayName: deployment strategy
+    name: DEPLOYMENT_STRATEGY
+    required: true
+  - displayName: ReplicaSet No
+    required: true
+    name: REPLICA_SET
+  - displayName: deployment strategy
+    required: true
+    name: POD_PORT
