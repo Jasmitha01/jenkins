@@ -22,7 +22,7 @@ objects:
         dockerfile: ${DOCKERFILE}
       strategy:
         type: Docker
-        sourceStrategy:
+        dockerStrategy:
           from:
             kind: ImageStreamTag
             name: 'centos:latest'
