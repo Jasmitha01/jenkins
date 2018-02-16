@@ -1,34 +1,41 @@
----
-kind: List
-apiVersion: v1
-metadata: {}
-items:
-- kind: BuildConfig
-  apiVersion: v1
-  metadata:
-    name: ${APPLICATION_NAME}
-    labels:
-      app: ${APPLICATION_NAME}
-  spec:
-    triggers:
-    - type: Generic
-      generic:
-        secret: secret
-    - type: ConfigChange
-    - type: ImageChange
-      imageChange: {}
-    source:
-      type: Dockerfile
-      dockerfile: ${DOCKERFILE}
-    strategy:
-      type: Docker
-      sourceStrategy:
-        from:
+kind: "Template"
+apiVersion: "v1"
+metadata:
+  name: BuildConfig
+objects:
+  - kind: BuildConfig
+    apiVersion: v1
+    metadata:
+      name: ${APPLICATION_NAME}
+      labels:
+        app: ${APPLICATION_NAME}
+    spec:
+      triggers:
+      - type: Generic
+        generic:
+          secret: secret
+      - type: ConfigChange
+      - type: ImageChange
+        imageChange: {}
+      source:
+        type: Dockerfile
+        dockerfile: ${DOCKERFILE}
+      strategy:
+        type: Docker
+        sourceStrategy:
+          from:
+            kind: ImageStreamTag
+            name: 'centos:latest'
+      output:
+        to:
           kind: ImageStreamTag
-          name: 'centos:latest'
-    output:
-      to:
-        kind: ImageStreamTag
-        name: ${APPLICATION_NAME}:latest
-    resources: {}
-    postCommit: {}
+          name: ${APPLICATION_NAME}:latest
+      resources: {}
+      postCommit: {}
+parameters:
+  - displayName: Application Name
+    required: true
+    name: APPLICATION_NAME
+  - displayName: DockerFile Content
+    name: DOCKERFILE
+    required: true
