@@ -1,0 +1,7 @@
+###
+logging.config=one
+spring.resources.cache-period=259200
+spring.resources.chain.cache=true
+# ENDPOINTS [anand]
+endpoints.enabled=true
+endpoints.sensitive=false

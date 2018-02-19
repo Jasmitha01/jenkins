@@ -1,0 +1,7 @@
+###
+logging.config_one=one
+spring.resources.one=259200
+spring.resources.chain.one=true
+# ENDPOINTS_ONE [anand]
+endpoints.enabled_one=true
+endpoints.sensitive_one=false

@@ -1,0 +1,7 @@
+###
+two.config=one
+spring.resources.two=259200
+spring.resources.chain.two=true
+# ENDPOINTS_two [anand]
+endpoints.enabled_two=true
+endpoints.sensitive_two=false

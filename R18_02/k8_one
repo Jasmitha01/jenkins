@@ -1,0 +1,9 @@
+###
+server.k8.one=1
+server.k8.two=2
+server.k8.three=3
+server.k8.four=4
+# K8_CONFIG
+endpoints.one=1
+endpoints.two=2
+endpoints.three=3
